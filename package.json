@@ -1,0 +1,12 @@
+{
+  "name": "k6-tutorial",
+  "version": "1.0.0",
+  "description": "Belajar Performance Testing",
+  "license": "ISC",
+  "author": "M Elham Abdussalam",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
