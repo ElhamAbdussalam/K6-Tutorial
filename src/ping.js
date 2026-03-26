@@ -9,5 +9,5 @@ export const options = {
 
 export default function () {
   http.get("http://localhost:3000/ping");
-  // sleep(1);
+  sleep(1);
 }
