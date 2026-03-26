@@ -2,9 +2,11 @@ import http from "k6/http";
 import { sleep, check } from "k6";
 
 export const options = {
-  vus: 10,
-  duration: "30s",
-  summaryTrendStats: ["avg", "min", "med", "max", "p(90)", "p(95)", "p(99)"],
+  stages: [
+    { duration: "10s", target: 20 },
+    { duration: "10s", target: 10 },
+    { duration: "10s", target: 0 },
+  ],
 };
 
 export default function () {
