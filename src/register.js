@@ -1,5 +1,5 @@
 import http from "k6/http";
-import { sleep, check } from "k6";
+import { sleep, check, fail } from "k6";
 
 export const options = {
   vus: 10,
@@ -8,27 +8,15 @@ export const options = {
 
 export default function () {
   const uniqueId = new Date().getTime();
-  const body = {
+  const registerRequest = {
     username: `user-${uniqueId}`,
     password: "rahasia",
     name: "user",
   };
 
-  http.post("http://localhost:3000/api/users", JSON.stringify(body), {
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
-  });
-
-  const loginBody = {
-    username: `user-${uniqueId}`,
-    password: "rahasia",
-  };
-
-  const response = http.post(
-    "http://localhost:3000/api/users/login",
-    JSON.stringify(loginBody),
+  const registerResponse = http.post(
+    "http://localhost:3000/api/users",
+    JSON.stringify(registerRequest),
     {
       headers: {
         Accept: "application/json",
@@ -37,14 +25,40 @@ export default function () {
     },
   );
 
-  const responseBody = response.json();
+  if (registerResponse.status !== 200) {
+    fail(`Failed to register user-${uniqueId}`);
+  }
+
+  const loginRequest = {
+    username: `user-${uniqueId}`,
+    password: "rahasia",
+  };
+
+  const loginResponse = http.post(
+    "http://localhost:3000/api/users/login",
+    JSON.stringify(loginRequest),
+    {
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    },
+  );
+
+  if (loginResponse.status !== 200) {
+    fail(`Failed to login user-${uniqueId}`);
+  }
+
+  const loginBodyResponse = loginResponse.json();
 
   const currentResponse = http.get("http://localhost:3000/api/users/current", {
     headers: {
       Accept: "application/json",
-      Authorization: responseBody.data.token,
+      Authorization: loginBodyResponse.data.token,
     },
   });
 
-  const currentBody = currentResponse.json();
+  if (currentResponse.status !== 200) {
+    fail(`Failed to get current user-${uniqueId}`);
+  }
 }
