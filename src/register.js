@@ -25,7 +25,13 @@ export default function () {
     },
   );
 
-  if (registerResponse.status !== 200) {
+  const checkRegister = check(registerResponse, {
+    "register response status must 200": (response) => response.status === 200,
+    "register response data must not null": (response) =>
+      response.json().data != null,
+  });
+
+  if (!checkRegister) {
     fail(`Failed to register user-${uniqueId}`);
   }
 
@@ -45,7 +51,13 @@ export default function () {
     },
   );
 
-  if (loginResponse.status !== 200) {
+  const checkLogin = check(loginResponse, {
+    "login response status must 200": (response) => response.status === 200,
+    "login response data must not null": (response) =>
+      response.json().data.token != null,
+  });
+
+  if (!checkLogin) {
     fail(`Failed to login user-${uniqueId}`);
   }
 
@@ -58,7 +70,13 @@ export default function () {
     },
   });
 
-  if (currentResponse.status !== 200) {
+  const checkCurrent = check(currentResponse, {
+    "current response status must 200": (response) => response.status === 200,
+    "current response data must not null": (response) =>
+      response.json().data != null,
+  });
+
+  if (!checkCurrent) {
     fail(`Failed to get current user-${uniqueId}`);
   }
 }
