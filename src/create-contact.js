@@ -1,6 +1,8 @@
 import http from "k6/http";
 import { sleep, check, fail } from "k6";
 import execution from "k6/execution";
+import { loginUser } from "./helper/user.js";
+import { createContact } from "./helper/contact.js";
 
 export const options = {
   vus: 10,
@@ -26,26 +28,7 @@ export function getToken() {
     password: "rahasia",
   };
 
-  const loginResponse = http.post(
-    "http://localhost:3000/api/users/login",
-    JSON.stringify(loginRequest),
-    {
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-    },
-  );
-
-  const checkLogin = check(loginResponse, {
-    "login response status must 200": (response) => response.status === 200,
-    "login response data must not null": (response) =>
-      response.json().data.token != null,
-  });
-
-  if (!checkLogin) {
-    fail(`Failed to login user-${username}`);
-  }
+  const loginResponse = loginUser(loginRequest);
 
   const loginBodyResponse = loginResponse.json();
   return loginBodyResponse.data.token;
@@ -55,20 +38,7 @@ export default function (data) {
   const token = getToken();
   for (let i = 0; i < data.length; i++) {
     const contact = data[i];
-    const response = http.post(
-      "http://localhost:3000/api/contacts",
-      JSON.stringify(contact),
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: token,
-        },
-      },
-    );
-    check(response, {
-      "create contact status is 200": (response) => response.status === 200,
-    });
+    createContact(token, contact);
   }
 }
 
