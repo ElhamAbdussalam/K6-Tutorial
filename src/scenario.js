@@ -1,3 +1,4 @@
+import { Counter } from "k6/metrics";
 import { createContact } from "./helper/contact.js";
 import { registerUser, loginUser } from "./helper/user.js";
 import execution from "k6/execution";
@@ -20,6 +21,9 @@ export const options = {
   },
 };
 
+const registerCounterSuccess = new Counter("user_registration_counter_success");
+const registerCounterError = new Counter("user_registration_counter_error");
+
 export function userRegistration() {
   const uniqueId = new Date().getTime();
   const registerRequest = {
@@ -28,7 +32,12 @@ export function userRegistration() {
     name: "Elham",
   };
 
-  registerUser(registerRequest);
+  const response = registerUser(registerRequest);
+  if (response.status === 200) {
+    registerCounterSuccess.add(1);
+  } else {
+    registerCounterError.add(1);
+  }
 }
 
 export function contactCreation() {
